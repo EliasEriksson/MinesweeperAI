@@ -4,9 +4,11 @@ from pathlib import Path, PosixPath
 import board.filters as filters
 
 
-def find(image_path: Union[Path, PosixPath], difficulty):
+def find(image_path: Union[Path, PosixPath]):
     image: Image.Image = Image.open(image_path)
-    potential_starting_points = filters.black_and_white(image, difficulty)
+    potential_starting_points = filters.black_and_white(image)
+    potential_starting_points = filters.color(image, *potential_starting_points)
+
     return potential_starting_points
 
 
