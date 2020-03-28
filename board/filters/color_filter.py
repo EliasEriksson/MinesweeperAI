@@ -7,6 +7,18 @@ def line_is_color(image: Image.Image,
                   end: Tuple[int, int],
                   color: tuple,
                   ) -> bool:
+    """
+    checks weather a line is made of only one color
+
+    in reality a rectangle is checked but will only be used for 1 pixel wide rectangles
+    this allows the same function to be used for both vertical and horizontal lines
+
+    :param image: PIL.Image.Image
+    :param start: Tuple[int, int], start of the line
+    :param end: Tuple[int, int], end of the line
+    :param color: tuple, a tuple of some length (representing the colors of a pixel) depending on image format
+    :return: bool, true if line is of same color else false
+    """
     (x1, y1), (x2, y2) = start, end
     for x in range(x1, x2):
         for y in range(y1, y2 + 1):
@@ -20,6 +32,23 @@ def outline_is_grid(image: Image.Image,
                     end: Tuple[int, int],
                     square_size: int,
                     ) -> bool:
+    """
+    checks weather the outline of the rectangle is in a grid pattern
+
+    the grid is assumed be 2 colors (like a chessboard)
+    the color of the first pixel of a square is selected and passed down to see if the
+    squares outline is the same color using `line_is_color`
+    then takes the color of the second square
+    and does the same thing
+    OBS only the first pixel of the first and second square in line are used to
+    compare all squares outlines
+
+    :param image: PIL.Image.Image, image to be analyzed
+    :param start: Tuple[int, int], start of the rectangle
+    :param end: Tuple[int, int], end of the rectangle
+    :param square_size: the size of the squares on the grid
+    :return: bool, true if its a grid pattern else false
+    """
     (x1, y1), (x2, y2) = start, end
 
     for i, x in enumerate(range(x1, x2, square_size)):
@@ -46,6 +75,21 @@ def outline_is_grid(image: Image.Image,
 def color_filter(image: Image.Image,
                  *boards: Tuple[Tuple[int, int], Tuple[int, int], int],
                  ) -> List[Tuple[Tuple[int, int], Tuple[int, int], int]]:
+    """
+    filters given boards with google´s minesweeper defining colors patterns
+
+    return the given boards who fill the following criteria
+    1: if the outline of the board is in a grid pattern described in `outline_is_grid`
+    2: the pixel line above the board is the same color confirming the game menu
+    3: if the pixel left of the game menu is in a different color than the game menu
+    4: if the pixel right of the game menu is in a different color than the game menu
+
+
+    :param image: PIL.Image.Image, image to be analyzed
+    :param boards: Tuple[Tuple[int, int], Tuple[int, int], int], game boards to be filtered
+    :return: Tuple[Tuple[int, int], Tuple[int, int], int], game boards that complies to the above criteria
+    """
+
     return [
         (start, end, difficulty)
         for (x1, y1), (x2, y2), difficulty in boards

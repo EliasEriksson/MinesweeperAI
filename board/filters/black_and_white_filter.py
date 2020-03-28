@@ -20,46 +20,80 @@ HEIGHTS = (EASY_HEIGHT, MEDIUM_HEIGHT, HARD_HEIGHT)
 
 
 def _look_down(image: Image.Image,
-               coordinate: Tuple[int, int]
+               start: Tuple[int, int]
                ) -> Union[Tuple[int, int], Tuple[()]]:
-    x, y = coordinate
+    """
+    searches for a column of white pixels
+
+    from start each pixel bellow is checked if its black
+    if its black return the current pixels coordinate
+    if no black pixel is found an empty tuple is returned which can be
+    evaluated to false
+
+    :param image: PIL.Image.Image, analyzed image
+    :param start: Tuple[int, int], starting coordinate
+    :return: Union[Tuple[int, int], Tuple[()]], last white pixel bellow start
+    """
+    x, y = start
     for y in range(y, image.height - 1):
-        if image.getpixel((x, y)) == WHITE:
-            if image.getpixel((x, y + 1)) == BLACK:
-                if image.getpixel((x, y + 1)) == BLACK:
-                    return x, y
-        else:
-            return ()
+        if image.getpixel((x, y + 1)) == BLACK:
+            return x, y
     return ()
 
 
 def _look_right(image: Image.Image,
-                coordinate: Tuple[int, int]
+                start: Tuple[int, int]
                 ) -> Union[Tuple[int, int], Tuple[()]]:
-    x, y = coordinate
+    """
+    searches for a row of white pixels
+
+    from start each pixel to the right is checked if its black
+    if its black return the current pixels coordinate
+    if no black pixel is found an empty tuple is returned which can
+    be evaluated to false
+
+    :param image: PIL.Image.Image, analyzed image
+    :param start: Tuple[int, int], starting coordinate
+    :return: Union[Tuple[int, int], Tuple[()]], last white pixel to the right of start
+    """
+    x, y = start
     for x in range(x, image.width - 1):
-        if image.getpixel((x, y)) == WHITE:
-            if image.getpixel((x + 1, y)) == BLACK:
-                if image.getpixel((x + 1, y)) == BLACK:
-                    return x, y
-        else:
-            return ()
+        if image.getpixel((x + 1, y)) == BLACK:
+            return x, y
     return ()
 
 
 def _look_around(image: Image.Image,
-                 coordinate: Tuple[int, int]
+                 start: Tuple[int, int]
                  ) -> Union[Tuple[int, int], Tuple[()]]:
-    x, y = coordinate
-    if image.getpixel((x - 1, y)) == BLACK:
-        if image.getpixel((x + 1, y)) == WHITE:
-            if image.getpixel((x, y - 1)) == BLACK:
-                if image.getpixel((x, y + 1)) == WHITE:
-                    if right := _look_right(image, coordinate):
-                        if down := _look_down(image, coordinate):
-                            if (corner := _look_right(image, down)) == _look_down(image, right) and corner:
-                                return corner
-    return ()
+    """
+    looks in all directions of given starting point and tries to find an outline of a rectangle
+
+    preforms algorithm described in `black_and_white_filter`
+
+    :param image: PIL.Image.Image, image to be analyzed
+    :param start: Tuple[int, int], first coordinate of a rectangle to be tested
+    :return: Union[Tuple[int, int], Tuple[()]], second coordinate to define a rectangle
+    """
+    x, y = start
+
+    if image.getpixel(start) != WHITE:
+        return ()
+    if image.getpixel((x - 1, y)) != BLACK:
+        return ()
+    if image.getpixel((x + 1, y)) != WHITE:
+        return ()
+    if image.getpixel((x, y - 1)) != BLACK:
+        return ()
+    if image.getpixel((x, y + 1)) != WHITE:
+        return ()
+    if not (right := _look_right(image, start)):
+        return ()
+    if not (down := _look_down(image, start)):
+        return ()
+    if not (corner := _look_right(image, down)) == _look_down(image, right) and not corner:
+        return ()
+    return corner
 
 
 def black_and_white_filter(image: Image.Image,
