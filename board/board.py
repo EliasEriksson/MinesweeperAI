@@ -1,21 +1,27 @@
 from typing import *
-from .field import Field
+from .field import Field, GreenField
+from PIL import Image
+
+"""
+1: save the whole grid in a dict with x, y coordinates as keys in tuple
+2: make sets with keys as well where union and intersect operations can be preformed to
+       get intresting keys for the grid dict
+3: iterate over returned keys and use on the dict
+"""
+
+
 
 
 class Grid:
-    def __init__(self, grid: List[List[Field]]) -> None:
+    def __init__(self: "Grid", grid: List[List[Field]]) -> None:
         self.grid = grid
 
-    def __getitem__(self, coordinate: Tuple[int, int]) -> Field:
+    def __getitem__(self: "Grid", coordinate: Tuple[int, int]) -> Field:
         x, y = coordinate
         return self.grid[x][y]
 
-    def __repr__(self) -> str:
-        return (f"{self.__class__.__name__}([\n"
-                f"{self[0, 0]},\t{self[1, 0]},\t...,\t\t\t\t...\n"
-                f"{self[0, 1]},\t...,\t\t\t...,\t\t\t\t{self[-1, -2]}\n"
-                f"...,\t\t\t...,\t\t\t{self[-2, -1]},\t{self[-1, -1]}\n"
-                f"])")
+    def __repr__(self: "Grid") -> str:
+        return f"{self.__class__.__name__}({self.grid})"
 
 
 class Board:
@@ -30,15 +36,22 @@ class Board:
         self.board_width = end[0] - start[0]
         self.board_height = end[1] - start[1]
         self.grid = Grid([
-            [Field((x, y), 45 - 5 * difficulty)
+            [GreenField((x, y), 45 - 5 * difficulty)
              for y in range(0, self.board_height, self.square_size)]
             for x in range(0, self.board_width, self.square_size)
         ])
+        self.numbers = []
+        self.beige_fields = []
+        self.mines = []
 
-    def __getitem__(self, coordinate: Tuple[int, int]):
+    def update_grid(self, image: Image.Image, clicked: Tuple[int, int]) -> None:
+        # clicked is not pixels
+        pass
+
+    def __getitem__(self: "Board", coordinate: Tuple[int, int]):
         return self.grid[coordinate]
 
-    def __repr__(self):
+    def __repr__(self: "Board"):
         return (f"{self.__class__.__name__}: start={self.start}, end={self.end}, "
                 f"width={self.board_width}, height={self.board_height}")
 
