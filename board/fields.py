@@ -13,34 +13,31 @@ class Field:
         :param args:
         """
         x, y = coordnate
-        self.coordinate = coordnate
+        self.image_coordinate = (x * size, y * size)
+        self.board_coordinate = coordnate
         self.size = size
-        self.lookup_point = (x + 2, y + 2)
+        self.lookup_point = (x * size + 4, y * size + 4)
 
     @classmethod
     def from_field(cls, field: "Field", *args):
-        cls(field.coordinate, field.size, args)
+        return cls(field.board_coordinate, field.size, args)
 
     def __add__(self, pixels: int):
-        x, y = self.coordinate
+        x, y = self.image_coordinate
         return x + pixels, y + pixels
 
     def __repr__(self) -> str:
-        return f"{self.__class__.__name__}{self.coordinate}"
+        return (f"{self.__class__.__name__}("
+                f"board_coordinate={self.board_coordinate}), "
+                f"image_coordinate={self.image_coordinate}")
 
 
 class GreenField(Field):
-    def __init__(self: "GreenField",
-                 coordinate: Tuple[int, int],
-                 size: int):
-        super(GreenField, self).__init__(coordinate, size)
+    pass
 
 
 class BeigeField(Field):
-    def __init__(self: "BeigeField",
-                 coordinate: Tuple[int, int],
-                 size: int) -> None:
-        super(BeigeField, self).__init__(coordinate, size)
+    pass
 
 
 class Number(Field):
@@ -53,10 +50,7 @@ class Number(Field):
 
 
 class Mine(Field):
-    def __init__(self: "Mine",
-                 coordinate: Tuple[int, int],
-                 size: int) -> None:
-        super(Mine, self).__init__(coordinate, size)
+    pass
 
 
 if __name__ == '__main__':

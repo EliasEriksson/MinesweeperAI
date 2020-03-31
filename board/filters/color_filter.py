@@ -89,7 +89,7 @@ def color_filter(image: Image.Image,
     :param boards: Tuple[Tuple[int, int], Tuple[int, int], int], game boards to be filtered
     :return: Tuple[Tuple[int, int], Tuple[int, int], int], game boards that complies to the above criteria
     """
-
+    print(boards)
     return [
         (start, end, difficulty)
         for (x1, y1), (x2, y2), difficulty in boards

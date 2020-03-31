@@ -6,14 +6,14 @@ from .errors import UnKnownDifficulty
 WHITE = 255
 BLACK = 0
 
-EASY_WIDTH = 450-1
-EASY_HEIGHT = 360-1
+EASY_WIDTH = 450
+EASY_HEIGHT = 360
 
-MEDIUM_WIDTH = 540-1
-MEDIUM_HEIGHT = 420-1
+MEDIUM_WIDTH = 540
+MEDIUM_HEIGHT = 420
 
-HARD_WIDTH = 600-1
-HARD_HEIGHT = 500-1
+HARD_WIDTH = 600
+HARD_HEIGHT = 500
 
 WIDTHS = (EASY_WIDTH, MEDIUM_WIDTH, HARD_WIDTH)
 HEIGHTS = (EASY_HEIGHT, MEDIUM_HEIGHT, HARD_HEIGHT)
@@ -131,4 +131,4 @@ def black_and_white_filter(image: Image.Image,
             (start, end, 3) if dx == MEDIUM_WIDTH else
             (start, end, 4)
             for start, end in potential_starting_points
-            if (dx := end[0] - start[0]) in WIDTHS and end[1] - start[1] in HEIGHTS]
+            if (dx := end[0] - start[0] + 1) in WIDTHS and end[1] - start[1] + 1 in HEIGHTS]

@@ -13,60 +13,62 @@ import pytesseract
 """
 
 
-# def identify_field(image: Image.Image, field: fields.Field) -> fields.Field:
-#     if image.getpixel(field.lookup_point) == 0:
-#         return field
-#     else:
-#         square = image.crop(field + field.size)
-#         number = pytesseract.image_to_string(square, config='--psm 10')
-#         if number:
-#             return fields.Number.from_field(field, number)
-#         else:
-#             return fields.BeigeField.from_field(field)
-
-
 class Board:
     def __init__(self: "Board",
                  start: Tuple[int, int],
                  end: Tuple[int, int],
                  difficulty: int
                  ) -> None:
+        """
+        for future:
+        :param start:
+        :param end:
+        :param difficulty:
+        """
         self.start = start
         self.end = end
         self.square_size = 45 - 5 * difficulty
-        self.board_width = end[0] - start[0]
-        self.board_height = end[1] - start[1]
+        self.board_width = end[0] - start[0] + 1
+        self.board_height = end[1] - start[1] + 1
 
-        # TODO make sure board gets correct coordinates
         self.board = {
             (x, y): fields.GreenField((x, y), self.square_size)
-            for y in range(0, int((self.board_height + 1) / self.square_size))
-            for x in range(0, int((self.board_width + 1) / self.square_size))}  # will be redefined after every update
-        self.keys = set(self.board.keys())  # will not change durring runtime
-        self.numbers = set()
-        self.beige_fields = set()
-        self.mines = set()
-        self.green_field = self.keys.copy()  # will get keys subtracted over time durring runtime
+            for y in range(0, int(self.board_height / self.square_size))
+            for x in range(0, int(self.board_width / self.square_size))}  # will be redefined after every update
+        self.keys: Set[Tuple[int, int]] = set(self.board.keys())  # will not change durring runtime
+        self.green_field: Set[Tuple[int, int]] = self.keys.copy()  # will get keys subtracted durring runtime
+        self.numbers: Set[fields.Number] = set()
+        self.beige_fields: Set[fields.BeigeField] = set()
+        self.mines: Set[fields.Mine] = set()
 
     def identify_field(self, image: Image.Image, field: fields.Field) -> fields.Field:
+        # OBS image must be a cropped image that only holds the game board
         if image.getpixel(field.lookup_point) == 0:
             return field
         else:
-            square = image.crop(field + field.size)
+            crop_box = (*field.lookup_point, *field + (field.size - 4))
+            square = image.crop(crop_box)
             number = pytesseract.image_to_string(square, config='--psm 10')
             if number:
-                self.numbers.add(self.board.pop(field.coordinate))
-                return fields.Number.from_field(field, number)
+                field = fields.Number.from_field(field, number)
+                self.green_field.remove(field.board_coordinate)
+                self.numbers.add(field)
+                return field
             else:
-                self.beige_fields.add(self.board.pop(field.coordinate))
-                return fields.BeigeField.from_field(field)
+                field = fields.BeigeField.from_field(field)
+                self.green_field.remove(field.board_coordinate)
+                self.beige_fields.add(field.board_coordinate)
+                return field
 
     def is_mine(self, key: Tuple[int, int]) -> None:
-        self.board[key] = fields.Mine.from_field(self.board[key])
+        field = fields.Mine.from_field(self.board[key])
+        self.mines.add(field)
+        self.board[key] = field
 
     def update(self, image: Image.Image) -> None:
         image = filters.field(image)
-        for key in self.green_field:
+        image.save("TestFiles/Progress/Filtered/board.png")
+        for key in self.green_field.copy():
             field = self.board[key]
             self.board[key] = self.identify_field(image, field)
 

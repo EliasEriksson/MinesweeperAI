@@ -1,22 +1,26 @@
+from typing import *
 import board
 from pathlib import Path
+from PIL import Image
 
+paths = [
+    "TestFiles/Progress/move0.png",
+    "TestFiles/Progress/move1.png",
+    "TestFiles/Progress/move2.png"
+]
 
-image_path = Path("TestFiles/minsweeper_test_fast6.png")
-board = board.find(image_path)
-print(board)
-print(board.keys)
-board.update()
+moves = [
+    Image.open(path)
+    for path in paths
+]
 
+possitions = board.find(moves[0])
 
-if not board:
-    quit()
+moves = [
+    move.crop((*possitions[0], *possitions[1]))
+    for move in moves
+]
 
-
-# image_dir_path = Path("TestFiles")
-# for image_path in image_dir_path.iterdir():
-#     if image_path.suffix == ".png":
-#         boards = board.find(image_path)
-#         print(f"{image_path}: {boards}")
-
-
+b = board.Board(*possitions)
+# b.update(moves[1])
+print()
