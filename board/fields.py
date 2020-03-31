@@ -17,6 +17,7 @@ class Field:
         self.board_coordinate = coordnate
         self.size = size
         self.lookup_point = (x * size + 4, y * size + 4)
+        self.middle = (x * size + (length := round(size / 2)), y * size + length)
 
     @classmethod
     def from_field(cls, field: "Field", *args):

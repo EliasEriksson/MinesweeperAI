@@ -46,7 +46,7 @@ class Board:
         if image.getpixel(field.lookup_point) == 0:
             return field
         else:
-            crop_box = (*field.lookup_point, *field + (field.size - 4))
+            crop_box = (*field.lookup_point, *field + (field.size - 4))  # TODO remove dependency on field.__add__
             square = image.crop(crop_box)
             number = pytesseract.image_to_string(square, config='--psm 10')
             if number:
@@ -72,9 +72,12 @@ class Board:
             field = self.board[key]
             self.board[key] = self.identify_field(image, field)
 
-    def __getitem__(self: "Board", coordinate: Tuple[int, int]):
+    def __getitem__(self: "Board", coordinate: Tuple[int, int]) -> fields.Field:
         return self.board[coordinate]
 
-    def __repr__(self: "Board"):
+    def __repr__(self: "Board") -> str:
         return (f"{self.__class__.__name__}(start={self.start}, end={self.end}, "
                 f"width={self.board_width}, height={self.board_height})")
+
+    def __iter__(self) -> Iterable[Tuple[int, int]]:
+        return iter(self.green_field.copy())
