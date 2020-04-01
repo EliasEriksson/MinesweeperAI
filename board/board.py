@@ -37,22 +37,22 @@ class Board:
             for x in range(0, int(self.board_width / self.square_size))}  # will be redefined after every update
         self.keys: Set[Tuple[int, int]] = set(self.board.keys())  # will not change durring runtime
         self.green_field: Set[Tuple[int, int]] = self.keys.copy()  # will get keys subtracted durring runtime
-        self.numbers: Set[fields.Number] = set()
-        self.beige_fields: Set[fields.BeigeField] = set()
-        self.mines: Set[fields.Mine] = set()
+        self.numbers: Set[Tuple[int, int]] = set()
+        self.beige_fields: Set[Tuple[int, int]] = set()
+        self.mines: Set[Tuple[int, int]] = set()
+        self.size = max(self.board.keys())
 
     def identify_field(self, image: Image.Image, field: fields.Field) -> fields.Field:
         # OBS image must be a cropped image that only holds the game board
         if image.getpixel(field.lookup_point) == 0:
             return field
         else:
-            crop_box = (*field.lookup_point, *field + (field.size - 4))  # TODO remove dependency on field.__add__
-            square = image.crop(crop_box)
+            square = image.crop(field.lookup_area)
             number = pytesseract.image_to_string(square, config='--psm 10')
             if number:
-                field = fields.Number.from_field(field, number)
+                field: fields.Field = fields.Number.from_field(field, number)
                 self.green_field.remove(field.board_coordinate)
-                self.numbers.add(field)
+                self.numbers.add(field.board_coordinate)
                 return field
             else:
                 field = fields.BeigeField.from_field(field)
@@ -61,8 +61,8 @@ class Board:
                 return field
 
     def is_mine(self, key: Tuple[int, int]) -> None:
-        field = fields.Mine.from_field(self.board[key])
-        self.mines.add(field)
+        field: fields.Mine = fields.Mine.from_field(self.board[key])
+        self.mines.add(field.board_coordinate)
         self.board[key] = field
 
     def update(self, image: Image.Image) -> None:

@@ -23,4 +23,8 @@ from PIL import Image
 
 ai = AI()
 
+print("init done")
+
+print("starting to solve")
+ai.solve()
 print()
