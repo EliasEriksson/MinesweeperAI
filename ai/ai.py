@@ -5,6 +5,7 @@ from PIL import Image
 # noinspection PyPep8Naming
 import pyscreenshot as ImageGrab
 from pynput.mouse import Button, Controller
+from time import sleep
 
 
 def screenshot(start: Optional[Tuple[int, int]] = None,
@@ -40,6 +41,7 @@ class AI:
         # TODO implemend field.__add__ to deal with this
         self.mouse.position = (sum(pair) for pair in zip(self.board[key].middle, self.board_start))
         self.mouse.click(Button.left)
+        sleep(0.6)
         self.update()
 
     def fields_nearby(self: "AI",
@@ -76,11 +78,14 @@ class AI:
 
     def solve(self: "AI"
               ):
+
+        middle = round(self.board.size[0] / 2), round(self.board.size[1] / 2)
+        self.click(middle)
         while self.board.green_field:
             # noinspection PyTypeChecker
             hungry_numbers: Set[fields.Number] = set(
                 nearby_number
-                for key in self.board
+                for key in self.board  # keys to green fields
                 if (nearby_numbers := self.fields_nearby(key, fields.Number))
                 for nearby_number in nearby_numbers
             )

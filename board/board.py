@@ -50,7 +50,7 @@ class Board:
             square = image.crop(field.lookup_area)
             number = pytesseract.image_to_string(square, config='--psm 10')
             if number:
-                field: fields.Field = fields.Number.from_field(field, number)
+                field: fields.Field = fields.Number.from_field(field, int(number))
                 self.green_field.remove(field.board_coordinate)
                 self.numbers.add(field.board_coordinate)
                 return field

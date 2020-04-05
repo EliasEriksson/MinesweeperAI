@@ -33,7 +33,7 @@ class Field:
 
     @classmethod
     def from_field(cls, field: "Field", *args):
-        return cls(field.board_coordinate, field.size, args)
+        return cls(field.board_coordinate, field.size, *args)
 
     def __eq__(self, other: Type[object]) -> bool:
         return self.__class__.__name__ == other.__name__
@@ -63,7 +63,7 @@ class Number(Field):
     def __init__(self: "Number",
                  coordinate: Tuple[int, int],
                  size: int,
-                 number: int,) -> None:
+                 number: Tuple[int, ...]) -> None:
         super(Number, self).__init__(coordinate, size)
         self.number = number
 
