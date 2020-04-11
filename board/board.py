@@ -12,6 +12,8 @@ import pytesseract
 3: iterate over returned keys and use on the dict
 """
 
+T = TypeVar("T", bound=fields.Field)
+
 
 class Board:
     def __init__(self: "Board",
@@ -37,12 +39,12 @@ class Board:
             for x in range(0, int(self.board_width / self.square_size))}  # will be redefined after every update
         self.keys: Set[Tuple[int, int]] = set(self.board.keys())  # will not change durring runtime
         self.green_field: Set[Tuple[int, int]] = self.keys.copy()  # will get keys subtracted durring runtime
-        self.numbers: Set[Tuple[int, int]] = set()
+        self.numbers: Set[Tuple[int, int]] = set()  # TODO store Number in self.numbers instead
         self.beige_fields: Set[Tuple[int, int]] = set()
         self.mines: Set[Tuple[int, int]] = set()
         self.size = max(self.board.keys())
 
-    def identify_field(self, image: Image.Image, field: fields.Field) -> fields.Field:
+    def update_field(self, image: Image.Image, field: fields.Field) -> fields.Field:
         # OBS image must be a cropped image that only holds the game board
         if image.getpixel(field.lookup_point) == 0:
             return field
@@ -60,7 +62,7 @@ class Board:
                 self.beige_fields.add(field.board_coordinate)
                 return field
 
-    def is_mine(self, key: Tuple[int, int]) -> None:
+    def mark_as_mine(self, key: Tuple[int, int]) -> None:
         field: fields.Mine = fields.Mine.from_field(self.board[key])
         self.mines.add(field.board_coordinate)
         self.board[key] = field
@@ -70,9 +72,9 @@ class Board:
         image.save("TestFiles/Progress/Filtered/board.png")
         for key in self.green_field.copy():
             field = self.board[key]
-            self.board[key] = self.identify_field(image, field)
+            self.board[key] = self.update_field(image, field)
 
-    def __getitem__(self: "Board", coordinate: Tuple[int, int]) -> fields.Field:
+    def __getitem__(self: "Board", coordinate: Tuple[int, int]) -> TypeVar("Field", bound=fields.Field):
         return self.board[coordinate]
 
     def __repr__(self: "Board") -> str:

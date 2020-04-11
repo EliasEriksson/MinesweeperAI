@@ -41,13 +41,19 @@ class AI:
         # TODO implemend field.__add__ to deal with this
         self.mouse.position = (sum(pair) for pair in zip(self.board[key].middle, self.board_start))
         self.mouse.click(Button.left)
-        sleep(0.6)
-        self.update()
+        sleep(0.1)
+
+    def mark_as_mine(self, key: Tuple[int, int]) -> None:
+        if key not in self.board.mines:
+            self.mouse.position = (sum(pair) for pair in zip(self.board[key].middle, self.board_start))
+            self.mouse.click(Button.right)
+            self.board.mark_as_mine(key)
+            sleep(0.1)
 
     def fields_nearby(self: "AI",
                       key: Tuple[int, int],
                       field: Type[fields.Field]
-                      ) -> List[fields.Field]:
+                      ) -> List[TypeVar("Field", bound=fields.Field)]:
         fields_ = []
         x, y = key
         if 0 < x:
@@ -77,26 +83,33 @@ class AI:
         return fields_
 
     def solve(self: "AI"
-              ):
-
+              ) -> None:
         middle = round(self.board.size[0] / 2), round(self.board.size[1] / 2)
         self.click(middle)
-        while self.board.green_field:
-            # noinspection PyTypeChecker
-            hungry_numbers: Set[fields.Number] = set(
-                nearby_number
-                for key in self.board  # keys to green fields
-                if (nearby_numbers := self.fields_nearby(key, fields.Number))
-                for nearby_number in nearby_numbers
-            )
-            fields_to_click: Set[fields.GreenField] = {
-                green_field
-                for number in hungry_numbers
-                if (nearby_green_fields := self.fields_nearby(number.board_coordinate, fields.GreenField))
-                if len(nearby_green_fields) == number.number
+        while self.board.green_field.difference(self.board.mines):
+            # loops over all the numbers on the board and marks green fields as mines if its found to be a mine
+            mines = {
+                green_field.board_coordinate
+                for number in self.board.numbers
+                if (nearby_green_fields := self.fields_nearby(number, fields.GreenField))
+                if len(nearby_green_fields) == self.board[number].number - len(self.fields_nearby(number, fields.Mine))  # TODO store Number in self.numbers instead
                 for green_field in nearby_green_fields
             }
-            for green_field in fields_to_click:
-                self.click(green_field.middle)
+            [self.mark_as_mine(mine) for mine in mines]
+
+            # loops over all of the marked mines on the board and find all nearby numbers
+            # loops over all the found nearby numbers and checks how many mines are nearby
+            # if there are as many nearby mines as the value of the number all
+            # nearby green fields are located and are clicked
+            [
+                self.click(green_field.board_coordinate)
+                for mine in self.board.mines
+                if (numbers := self.fields_nearby(mine, fields.Number))
+                for number in numbers
+                if number.number == len(self.fields_nearby(number.board_coordinate, fields.Mine))
+                for green_field in self.fields_nearby(number.board_coordinate, fields.GreenField)
+            ]
+            sleep(1)
+            self.update()
 
 
