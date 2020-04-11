@@ -21,12 +21,6 @@ class Board:
                  end: Tuple[int, int],
                  difficulty: int
                  ) -> None:
-        """
-        for future:
-        :param start:
-        :param end:
-        :param difficulty:
-        """
         self.start = start
         self.end = end
         self.square_size = 45 - 5 * difficulty
@@ -69,7 +63,6 @@ class Board:
 
     def update(self, image: Image.Image) -> None:
         image = filters.field(image)
-        image.save("TestFiles/Progress/Filtered/board.png")
         for key in self.green_field.copy():
             field = self.board[key]
             self.board[key] = self.update_field(image, field)

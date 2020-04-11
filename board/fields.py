@@ -15,22 +15,6 @@ class Field:
         self.lookup_area = (*self.lookup_point, x * size + size - 4, y * size + size - 4)
         self.middle = (x * size + (length := round(size / 2)), y * size + length)
 
-    @staticmethod
-    def is_green_field():
-        return False
-
-    @staticmethod
-    def is_beige_field():
-        return False
-
-    @staticmethod
-    def is_number():
-        return False
-
-    @staticmethod
-    def is_mine():
-        return False
-
     @classmethod
     def from_field(cls, field: "Field", *args):
         return cls(field.board_coordinate, field.size, *args)
@@ -48,15 +32,11 @@ class Field:
 
 
 class GreenField(Field):
-    @staticmethod
-    def is_green_field():
-        return True
+    pass
 
 
 class BeigeField(Field):
-    @staticmethod
-    def is_beige_field():
-        return True
+    pass
 
 
 class Number(Field):
@@ -67,15 +47,9 @@ class Number(Field):
         super(Number, self).__init__(coordinate, size)
         self.number = number
 
-    @staticmethod
-    def is_number():
-        return True
-
 
 class Mine(Field):
-    @staticmethod
-    def is_mine():
-        return True
+    pass
 
 
 if __name__ == '__main__':

@@ -1,7 +1,6 @@
 from typing import *
 from PIL import Image
 import board.filters as filters
-from .board import Board
 import board.errors as errors
 
 
