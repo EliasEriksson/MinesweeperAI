@@ -86,6 +86,7 @@ class AI:
               ) -> None:
         middle = round(self.board.size[0] / 2), round(self.board.size[1] / 2)
         self.click(middle)
+        sleep(0.9)
         while self.board.green_field.difference(self.board.mines):
             # loops over all the numbers on the board and marks green fields as mines if its found to be a mine
             mines = {

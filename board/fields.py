@@ -8,10 +8,11 @@ class Field:
                  *args) -> None:
 
         x, y = coordnate
+        fix = 4 if size > 40 else 3
         self.image_coordinate = (x * size, y * size)
         self.board_coordinate = coordnate
         self.size = size
-        self.lookup_point = (x * size + 4, y * size + 4)
+        self.lookup_point = (x * size + fix, y * size + fix)
         self.lookup_area = (*self.lookup_point, x * size + size - 4, y * size + size - 4)
         self.middle = (x * size + (length := round(size / 2)), y * size + length)
 

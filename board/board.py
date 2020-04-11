@@ -44,7 +44,8 @@ class Board:
             return field
         else:
             square = image.crop(field.lookup_area)
-            number = pytesseract.image_to_string(square, config='--psm 10')
+            number = pytesseract.image_to_string(square, config='--psm 10, -c tessedit_char_whitelist=12345678')
+            print(number)
             if number:
                 field: fields.Field = fields.Number.from_field(field, int(number))
                 self.green_field.remove(field.board_coordinate)
