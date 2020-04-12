@@ -25,15 +25,16 @@ class AI:
         self.board_start: Tuple[int, int] = start
         self.board_end: Tuple[int, int] = end
         self.click_delay = 0.001
-        self.animation_delay = 0.95
+        self.animation_delay = 1
 
         self.board = board.Board(start, end, difficulty)
 
+        self.cursor_resting_point = round(start[0] + self.board.board_width * 0.75), start[1] - 20
         self.mouse = Controller()
 
     def update(self: "AI"
                ) -> None:
-        self.mouse.position = (self.board.start[0], self.board.start[1]-20)
+        self.mouse.position = self.cursor_resting_point
         sleep(self.animation_delay)
         image = screenshot(self.board_start, self.board_end)
         self.board.update(image)
@@ -90,9 +91,9 @@ class AI:
               ) -> None:
         middle = round(self.board.size[0] / 2), round(self.board.size[1] / 2)
         self.click(middle)
-        self.update()
         while True:
             # loops over all the numbers on the board and marks green fields as mines if its found to be a mine
+            self.update()
             mines = {
                 green_field.board_coordinate
                 for number in self.board.numbers
@@ -118,7 +119,5 @@ class AI:
             for field in fields_to_click:
                 self.click(field)
 
-            if not (mines and fields_to_click):
+            if not mines and not fields_to_click:
                 break
-
-            self.update()

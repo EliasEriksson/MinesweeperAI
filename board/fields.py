@@ -13,7 +13,7 @@ class Field:
         self.board_coordinate = coordnate
         self.size = size
         self.lookup_point = (x * size + fix, y * size + fix)
-        self.lookup_area = (*self.lookup_point, x * size + size - 4, y * size + size - 4)
+        self.lookup_area = (*self.lookup_point, x * size + size - fix, y * size + size - fix)
         self.middle = (x * size + (length := round(size / 2)), y * size + length)
 
     @classmethod
