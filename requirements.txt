@@ -1,4 +1,4 @@
-pillow
+pillow --global-option="build_ext" --global-option="--enable-xcb"
 numpy
-pyscreenshot
 pynput
+pytesseract
