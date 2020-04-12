@@ -4,8 +4,8 @@ from PIL import Image
 THRESHOLD = 300
 
 
-def field_filter(image: Image.Image) -> Image.Image:
-    # this function will probably move somplace else in the project structure in the future
+def field_filter(image: Image.Image
+                 ) -> Image.Image:
     """
     transforms a game field to black and white
 
