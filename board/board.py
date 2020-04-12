@@ -35,7 +35,11 @@ class Board:
         self.mines: Set[Tuple[int, int]] = set()
         self.size = max(self.board.keys())
 
-    def update_field(self, image: Image.Image, field: fields.Field) -> fields.Field:
+    def update_field(self: "Board",
+                     image: Image.Image,
+                     field: fields.Field
+                     ) -> fields.Field:
+
         # OBS image must be a cropped image that only holds the game board
         if image.getpixel(field.lookup_point) == 0:
             return field
@@ -53,23 +57,36 @@ class Board:
                 self.beige_fields.add(field.board_coordinate)
                 return field
 
-    def mark_as_mine(self, key: Tuple[int, int]) -> None:
+    def mark_as_mine(self: "Board",
+                     key: Tuple[int, int]
+                     ) -> None:
+
         field: fields.Mine = fields.Mine.from_field(self.board[key])
         self.mines.add(field.board_coordinate)
         self.board[key] = field
 
-    def update(self, image: Image.Image) -> None:
+    def update(self: "Board",
+               image: Image.Image
+               ) -> None:
+
         image = filters.field(image)
         for key in self:
             field = self.board[key]
             self.board[key] = self.update_field(image, field)
 
-    def __getitem__(self: "Board", coordinate: Tuple[int, int]) -> TypeVar("Field", bound=fields.Field):
+    def __getitem__(self: "Board",
+                    coordinate: Tuple[int, int]
+                    ) -> TypeVar("Field", bound=fields.Field):
+
         return self.board[coordinate]
 
-    def __repr__(self: "Board") -> str:
+    def __repr__(self: "Board"
+                 ) -> str:
+
         return (f"{self.__class__.__name__}(start={self.start}, end={self.end}, "
                 f"width={self.board_width}, height={self.board_height})")
 
-    def __iter__(self) -> Iterable[Tuple[int, int]]:
+    def __iter__(self: "Board"
+                 ) -> Iterable[Tuple[int, int]]:
+
         return iter(self.green_field.copy())
