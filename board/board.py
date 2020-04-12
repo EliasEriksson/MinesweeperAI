@@ -12,8 +12,6 @@ import pytesseract
 3: iterate over returned keys and use on the dict
 """
 
-T = TypeVar("T", bound=fields.Field)
-
 
 class Board:
     def __init__(self: "Board",
@@ -31,9 +29,9 @@ class Board:
             (x, y): fields.GreenField((x, y), self.square_size)
             for y in range(0, int(self.board_height / self.square_size))
             for x in range(0, int(self.board_width / self.square_size))}  # will be redefined after every update
-        self.keys: Set[Tuple[int, int]] = set(self.board.keys())  # will not change durring runtime
-        self.green_field: Set[Tuple[int, int]] = self.keys.copy()  # will get keys subtracted durring runtime
-        self.numbers: Set[Tuple[int, int]] = set()  # TODO store Number in self.numbers instead
+        # self.keys: Set[Tuple[int, int]] = set(self.board.keys())  # will not change durring runtime
+        self.green_field: Set[Tuple[int, int]] = set(self.board.keys())  # will get keys subtracted durring runtime
+        self.numbers: Set[Tuple[int, int]] = set()
         self.beige_fields: Set[Tuple[int, int]] = set()
         self.mines: Set[Tuple[int, int]] = set()
         self.size = max(self.board.keys())
@@ -45,7 +43,6 @@ class Board:
         else:
             square = image.crop(field.lookup_area)
             number = pytesseract.image_to_string(square, config='--psm 10, -c tessedit_char_whitelist=12345678')
-            print(number)
             if number:
                 field: fields.Field = fields.Number.from_field(field, int(number))
                 self.green_field.remove(field.board_coordinate)
@@ -64,7 +61,7 @@ class Board:
 
     def update(self, image: Image.Image) -> None:
         image = filters.field(image)
-        for key in self.green_field.copy():
+        for key in self:
             field = self.board[key]
             self.board[key] = self.update_field(image, field)
 
