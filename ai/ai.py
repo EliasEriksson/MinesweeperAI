@@ -20,10 +20,20 @@ def screenshot(start: Optional[Tuple[int, int]] = None,
 class AI:
     def __init__(self: "AI"
                  ) -> None:
+        """
+
+        :var self.start: the pixel position where the game board starts on screen.
+        :var self.end: the pixel position where the game board ends on screen.
+        :var self.click_delay: a safety delay to make sure the click occurs on the cursors position.
+        :var self.animation_delay: the animation of a clicked block being destroyed in to small particles.
+        :var self.board: instance of Board.
+        :var self.cursor_resting_point: a place for the cursor to be when a new screenshot is taken.
+        :var self.mouse: mouse controls.
+        """
         screen = screenshot()
         start, end, difficulty = board.find(screen)
-        self.board_start: Tuple[int, int] = start
-        self.board_end: Tuple[int, int] = end
+        self.start: Tuple[int, int] = start
+        self.end: Tuple[int, int] = end
         # a safety delay to make sure the click occurs on the cursors position
         self.click_delay = 0.001
         # the animation of a clicked block being destroyed in to small particles. screws with the image processing
@@ -45,7 +55,7 @@ class AI:
         """
         self.mouse.position = self.cursor_resting_point
         sleep(self.animation_delay)
-        image = screenshot(self.board_start, self.board_end)
+        image = screenshot(self.start, self.end)
         self.board.update(image)
 
     def click(self: "AI",
@@ -61,7 +71,7 @@ class AI:
         :param key: a board coordinate (not pixels)
         :return: None
         """
-        self.mouse.position = (sum(pair) for pair in zip(self.board[key].middle, self.board_start))
+        self.mouse.position = (sum(pair) for pair in zip(self.board[key].middle, self.start))
         sleep(self.click_delay)
         self.mouse.click(Button.left)
         sleep(self.click_delay)
@@ -81,7 +91,7 @@ class AI:
         :return: None
         """
         if key not in self.board.mines:
-            self.mouse.position = (sum(pair) for pair in zip(self.board[key].middle, self.board_start))
+            self.mouse.position = (sum(pair) for pair in zip(self.board[key].middle, self.start))
             sleep(self.click_delay)
             self.mouse.click(Button.right)
             sleep(self.click_delay)
@@ -188,4 +198,41 @@ class AI:
             # if no mines were found nor there were anywhere to click there wont be any change in next
             # iteration and might as well exit as the algorithm will not find anything more
             if not mines and not fields_to_click:
+                # something = {
+                #     "asd"
+                #     for number in self.board.numbers
+                #     if (nearby_green_fields := self.fields_nearby(number, fields.GreenField))
+                #     if (neighbouring_numbers_green_fields := {
+                #         num: self.fields_nearby(num.board_coordinate, fields.GreenField)
+                #         for green_field in nearby_green_fields
+                #         for num in self.fields_nearby(green_field.board_coordinate, fields.Number)
+                #         if num != self.board[number].number
+                #
+                #     })
+                #     # if all(
+                #     #     [n
+                #     #         for n, fields_ in neighbouring_numbers_green_fields.items()
+                #     #         if all(field in fields_ for field in nearby_green_fields)
+                #     #      ]
+                #     # )
+                # }
+                for number in self.board.numbers:
+                    number = self.board[number]
+                    if nearby_green_fields := self.fields_nearby(number.board_coordinate, fields.GreenField):
+                        neighbouring_numbers_green_fields = {
+                            num: self.fields_nearby(num.board_coordinate, fields.GreenField)
+                            for green_field in nearby_green_fields
+                            for num in self.fields_nearby(green_field.board_coordinate, fields.Number)
+                            if num != number}
+                        if neighbouring_numbers_green_fields:
+                            nums = [
+                                n
+                                for n, fields_ in neighbouring_numbers_green_fields.items()
+                                if all(field in fields_ for field in nearby_green_fields)
+                            ]
+
                 break
+
+
+if __name__ == '__main__':
+    print(AI.__init__.__doc__)
