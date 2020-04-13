@@ -24,11 +24,13 @@ class Field:
 
         return cls(field.board_coordinate, field.size, *args)
 
-    def __eq__(self: "Field",
-               other: Type[object]
-               ) -> bool:
-
+    def same_name(self, other: Type["Field"]) -> bool:
         return self.__class__.__name__ == other.__name__
+
+    def __eq__(self: "Field",
+               other: "Field"
+               ) -> bool:
+        return self.board_coordinate == other.board_coordinate
 
     def __hash__(self: "Field"
                  ) -> int:

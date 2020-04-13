@@ -35,7 +35,7 @@ class AI:
         self.start: Tuple[int, int] = start
         self.end: Tuple[int, int] = end
         # a safety delay to make sure the click occurs on the cursors position
-        self.click_delay = 0.001
+        self.click_delay = 0.005
         # the animation of a clicked block being destroyed in to small particles. screws with the image processing
         self.animation_delay = 1
 
@@ -117,29 +117,77 @@ class AI:
         x, y = key
         if 0 < x:
             if 0 < y:
-                if (field_ := self.board[(x - 1, y - 1)]) == field:
+                field_ = self.board[(x - 1, y - 1)]
+                if field_.same_name(field):
                     fields_.append(field_)
-            if (field_ := self.board[(x - 1, y)]) == field:
+            field_ = self.board[(x - 1, y)]
+            if field_.same_name(field):
                 fields_.append(field_)
+
         if y < self.board.size[1]:
             if 0 < x:
-                if (field_ := self.board[(x - 1, y + 1)]) == field:
+                field_ = self.board[(x - 1, y + 1)]
+                if field_.same_name(field):
                     fields_.append(field_)
-            if (field_ := self.board[(x, y + 1)]) == field:
+            field_ = self.board[(x, y + 1)]
+            if field_.same_name(field):
                 fields_.append(field_)
+
         if x < self.board.size[0]:
             if y < self.board.size[1]:
-                if (field_ := self.board[(x + 1, y + 1)]) == field:
+                field_ = self.board[(x + 1, y + 1)]
+                if field_.same_name(field):
                     fields_.append(field_)
-            if (field_ := self.board[(x + 1, y)]) == field:
+            field_ = self.board[(x + 1, y)]
+            if field_.same_name(field):
                 fields_.append(field_)
+
         if 0 < y:
             if x < self.board.size[0]:
-                if (field_ := self.board[(x + 1, y - 1)]) == field:
+                field_ = self.board[(x + 1, y - 1)]
+                if field_.same_name(field):
                     fields_.append(field_)
-            if (field_ := self.board[(x, y - 1)]) == field:
+            field_ = self.board[(x, y - 1)]
+            if field_.same_name(field):
                 fields_.append(field_)
         return fields_
+
+    def advanced_algorithm(self):
+        for number in self.board.numbers:
+            number = self.board[number]
+            if nearby_green_fields := self.fields_nearby(number.board_coordinate, fields.GreenField):
+                neighbouring_numbers_green_fields = {
+                    num: self.fields_nearby(num.board_coordinate, fields.GreenField)
+                    for green_field in nearby_green_fields
+                    for num in self.fields_nearby(green_field.board_coordinate, fields.Number)
+                    if num is not number}
+                if neighbouring_numbers_green_fields:
+                    nums = [
+                        n
+                        for n, fields_ in neighbouring_numbers_green_fields.items()
+                        if all(field in fields_ for field in nearby_green_fields)
+                    ]
+                    for num in nums:
+                        nums_mines = self.fields_nearby(num.board_coordinate, fields.Mine)
+                        some_coordinates = {
+                            field.board_coordinate
+                            for field in self.fields_nearby(num.board_coordinate, fields.GreenField)
+                        }.difference({
+                            field.board_coordinate
+                            for field in nearby_green_fields
+                        })
+                        if some_coordinates:
+                            if num.number - len(nums_mines) == 1:
+                                print(f"clicking {some_coordinates}")
+                                for coordinate in some_coordinates:
+                                    self.click(coordinate)
+                            else:
+                                print(f"marking {some_coordinates} as mines")
+                                for coordinate in some_coordinates:
+                                    self.mark_as_mine(coordinate)
+                            return True
+        print("did nothing")
+        return False
 
     def solve(self: "AI"
               ) -> None:
@@ -198,40 +246,8 @@ class AI:
             # if no mines were found nor there were anywhere to click there wont be any change in next
             # iteration and might as well exit as the algorithm will not find anything more
             if not mines and not fields_to_click:
-                # something = {
-                #     "asd"
-                #     for number in self.board.numbers
-                #     if (nearby_green_fields := self.fields_nearby(number, fields.GreenField))
-                #     if (neighbouring_numbers_green_fields := {
-                #         num: self.fields_nearby(num.board_coordinate, fields.GreenField)
-                #         for green_field in nearby_green_fields
-                #         for num in self.fields_nearby(green_field.board_coordinate, fields.Number)
-                #         if num != self.board[number].number
-                #
-                #     })
-                #     # if all(
-                #     #     [n
-                #     #         for n, fields_ in neighbouring_numbers_green_fields.items()
-                #     #         if all(field in fields_ for field in nearby_green_fields)
-                #     #      ]
-                #     # )
-                # }
-                for number in self.board.numbers:
-                    number = self.board[number]
-                    if nearby_green_fields := self.fields_nearby(number.board_coordinate, fields.GreenField):
-                        neighbouring_numbers_green_fields = {
-                            num: self.fields_nearby(num.board_coordinate, fields.GreenField)
-                            for green_field in nearby_green_fields
-                            for num in self.fields_nearby(green_field.board_coordinate, fields.Number)
-                            if num != number}
-                        if neighbouring_numbers_green_fields:
-                            nums = [
-                                n
-                                for n, fields_ in neighbouring_numbers_green_fields.items()
-                                if all(field in fields_ for field in nearby_green_fields)
-                            ]
-
-                break
+                if not self.advanced_algorithm():
+                    break
 
 
 if __name__ == '__main__':
