@@ -24,7 +24,7 @@ class AI:
         start, end, difficulty = board.find(screen)
         self.board_start: Tuple[int, int] = start
         self.board_end: Tuple[int, int] = end
-        # a safty delay to make sure the click occurs on the cursors position
+        # a safety delay to make sure the click occurs on the cursors position
         self.click_delay = 0.001
         # the animation of a clicked block being destroyed in to small particles. screws with the image processing
         self.animation_delay = 1
@@ -139,12 +139,12 @@ class AI:
         initializes with clicking the middle of the board
         and update the internal board.
 
-        finds garanteed mines based on a single number and its neighbouring green fields,
+        finds guaranteed mines based on a single number and its neighbouring green fields,
         if a number is equal to green fields + already marked mines the remaining green fields are mines.
-        eg: if 1 have 1 green field neibouring it must be a mine.
-        eg: if 2 ahve 1 green field and one mine neghbouring the green field must also be a mine.
+        eg: if 1 have 1 green field neighbouring it must be a mine.
+        eg: if 2 have 1 green field and one mine neighbouring the green field must also be a mine.
 
-        clicks garanteed non mines based on a single mines neighbouring number, if a number is "full of mines"
+        clicks guaranteed non mines based on a single mines neighbouring number, if a number is "full of mines"
         and have remaining green fields, the remaining green fields will be clicked.
         eg: if a 1 is neighbouring 1 mine and 2 green fields the green fields cant be mines.
 
@@ -165,7 +165,7 @@ class AI:
                 for green_field in nearby_green_fields
             }
 
-            # mark the mines visually with a flag (can be removed safly)
+            # mark the mines visually with a flag (can be removed sadly)
             for mine in mines:
                 self.mark_as_mine(mine)
 

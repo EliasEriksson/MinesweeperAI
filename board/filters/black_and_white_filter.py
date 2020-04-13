@@ -75,7 +75,6 @@ def _look_around(image: Image.Image,
     :param start: Tuple[int, int], first coordinate of a rectangle to be tested
     :return: Union[Tuple[int, int], Tuple[()]], second coordinate to define a rectangle
     """
-    # TODO this is not edge safe, can go out of bound on the image
     x, y = start
     nothing = ()
     if image.getpixel(start) != WHITE:
@@ -123,8 +122,8 @@ def black_and_white_filter(image: Image.Image,
 
     potential_starting_points = [
         (start, end)
-        for x in range(image.width)
-        for y in range(image.height)
+        for x in range(1, image.width - 1)
+        for y in range(1, image.height - 1)
         if image.getpixel((start := (x, y))) == WHITE
         if (end := _look_around(image, start))]
 
