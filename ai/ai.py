@@ -205,18 +205,19 @@ class AI:
                     if common_greenfields:
                         if adjacent_number.number - len(adjacent_number_mines) == 1:
                             if number.number - 1 - len(numbers_mines) == 1:
-                                to_mark = numbers_green_fields.difference(adjacent_number_green_fields)
-                                to_click = adjacent_number_green_fields.difference(numbers_green_fields)
-                                if to_click or to_mark:
-                                    if to_click:
-                                        print(f"more advanced clicking {to_click}")
-                                        for green_field in to_click:
-                                            self.click(green_field.board_coordinate)
-                                    if to_mark:
-                                        print(f"more advanced marking {to_mark}")
-                                        for mine in to_mark:
-                                            self.mark_as_mine(mine.board_coordinate)
-                                    return True
+                                if len(numbers_green_fields) - len(common_greenfields) == 1:
+                                    to_mark = numbers_green_fields.difference(adjacent_number_green_fields)
+                                    to_click = adjacent_number_green_fields.difference(numbers_green_fields)
+                                    if to_click or to_mark:
+                                        if to_click:
+                                            print(f"more advanced clicking {to_click}")
+                                            for green_field in to_click:
+                                                self.click(green_field.board_coordinate)
+                                        if to_mark:
+                                            print(f"more advanced marking {to_mark}")
+                                            for mine in to_mark:
+                                                self.mark_as_mine(mine.board_coordinate)
+                                        return True
         return False
 
     def solve(self: "AI"
