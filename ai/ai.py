@@ -100,7 +100,7 @@ class AI:
     def fields_nearby(self: "AI",
                       key: Tuple[int, int],
                       field: Type[fields.Field]
-                      ) -> List[TypeVar("Field", bound=fields.Field)]:
+                      ) -> Set[TypeVar("Field", bound=fields.Field)]:
         """
         looks around given coordinate for fields matching `field`'s type
 
@@ -113,43 +113,43 @@ class AI:
         :param field: field class to compare with
         :return: list of fields of same type as given field parameter
         """
-        fields_ = []
+        fields_ = set()
         x, y = key
         if 0 < x:
             if 0 < y:
                 field_ = self.board[(x - 1, y - 1)]
                 if field_.same_name(field):
-                    fields_.append(field_)
+                    fields_.add(field_)
             field_ = self.board[(x - 1, y)]
             if field_.same_name(field):
-                fields_.append(field_)
+                fields_.add(field_)
 
         if y < self.board.size[1]:
             if 0 < x:
                 field_ = self.board[(x - 1, y + 1)]
                 if field_.same_name(field):
-                    fields_.append(field_)
+                    fields_.add(field_)
             field_ = self.board[(x, y + 1)]
             if field_.same_name(field):
-                fields_.append(field_)
+                fields_.add(field_)
 
         if x < self.board.size[0]:
             if y < self.board.size[1]:
                 field_ = self.board[(x + 1, y + 1)]
                 if field_.same_name(field):
-                    fields_.append(field_)
+                    fields_.add(field_)
             field_ = self.board[(x + 1, y)]
             if field_.same_name(field):
-                fields_.append(field_)
+                fields_.add(field_)
 
         if 0 < y:
             if x < self.board.size[0]:
                 field_ = self.board[(x + 1, y - 1)]
                 if field_.same_name(field):
-                    fields_.append(field_)
+                    fields_.add(field_)
             field_ = self.board[(x, y - 1)]
             if field_.same_name(field):
-                fields_.append(field_)
+                fields_.add(field_)
         return fields_
 
     def advanced_algorithm(self):
@@ -181,13 +181,35 @@ class AI:
                                 print(f"clicking {some_coordinates}")
                                 for coordinate in some_coordinates:
                                     self.click(coordinate)
-                            else:
+                                return True
+                            elif len(some_coordinates) == 1:
                                 print(f"marking {some_coordinates} as mines")
                                 for coordinate in some_coordinates:
                                     self.mark_as_mine(coordinate)
-                            return True
+                                return True
         print("did nothing")
         return False
+
+    def more_advanced_algorithm(self):
+        for number in self.board.numbers:
+            number = self.board[number]
+            numbers_mines = self.fields_nearby(number.board_coordinate, fields.Mine)
+            if number.number - len(numbers_mines) == 1:
+                nums = self.fields_nearby(number.board_coordinate, fields.Number)
+                numbers_greenfields = self.fields_nearby(number.board_coordinate, fields.GreenField)
+                for num in nums:
+                    nums_green_fields = self.fields_nearby(num.board_coordinate, fields.GreenField)
+                    if 0 < len(nums_green_fields.intersection(numbers_greenfields)):
+                        nums_mines = self.fields_nearby(num.board_coordinate, fields.Mine)
+                        if len(nums_green_fields) - len(nums_mines) == 1:
+                            to_click = numbers_greenfields.difference(nums_green_fields)
+                            to_mark = nums_green_fields.difference(numbers_greenfields)
+                            for green_field in to_click:
+                                self.click(green_field.board_coordinate)
+                            for mine in to_mark:
+                                self.mark_as_mine(mine.board_coordinate)
+                            if not to_click and not to_mark:
+                                return False
 
     def solve(self: "AI"
               ) -> None:
@@ -247,7 +269,8 @@ class AI:
             # iteration and might as well exit as the algorithm will not find anything more
             if not mines and not fields_to_click:
                 if not self.advanced_algorithm():
-                    break
+                    if not self.more_advanced_algorithm():
+                        break
 
 
 if __name__ == '__main__':
