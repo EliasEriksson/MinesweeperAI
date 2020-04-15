@@ -153,71 +153,41 @@ class AI:
         return fields_
 
     def advanced_algorithm(self):
+        fields_to_click = set()
+        fields_to_mark = set()
         for number in self.board.numbers:
             number = self.board[number]
-            if nearby_green_fields := self.fields_nearby(number.board_coordinate, fields.GreenField):
-                neighbouring_numbers_green_fields = {
-                    num: self.fields_nearby(num.board_coordinate, fields.GreenField)
-                    for green_field in nearby_green_fields
-                    for num in self.fields_nearby(green_field.board_coordinate, fields.Number)
-                    if num is not number}
-                if neighbouring_numbers_green_fields:
-                    nums = [
-                        n
-                        for n, fields_ in neighbouring_numbers_green_fields.items()
-                        if all(field in fields_ for field in nearby_green_fields)
-                    ]
-                    for num in nums:
-                        nums_mines = self.fields_nearby(num.board_coordinate, fields.Mine)
-                        some_coordinates = {
-                            field.board_coordinate
-                            for field in self.fields_nearby(num.board_coordinate, fields.GreenField)
-                        }.difference({
-                            field.board_coordinate
-                            for field in nearby_green_fields
-                        })
-                        if some_coordinates:
-                            if num.number - len(nums_mines) == 1:
-                                print(f"advanced clicking {some_coordinates}")
-                                for coordinate in some_coordinates:
-                                    self.click(coordinate)
-                                return True
-                            elif len(some_coordinates) == 1:
-                                print(f"advanced marking {some_coordinates} as mines")
-                                for coordinate in some_coordinates:
-                                    self.mark_as_mine(coordinate)
-                                return True
-        print("did nothing")
-        return False
-
-    def more_advanced_algorithm(self):
-        for number in self.board.numbers:
-            number = self.board[number]
-            numbers_green_fields = self.fields_nearby(number.board_coordinate, fields.GreenField)
-            if numbers_green_fields:
+            number_green_fields = self.fields_nearby(number.board_coordinate, fields.GreenField)
+            if number_green_fields:
                 numbers_mines = self.fields_nearby(number.board_coordinate, fields.Mine)
-                # if 0 < len(numbers_mines):
                 adjacent_numbers = self.fields_nearby(number.board_coordinate, fields.Number)
                 for adjacent_number in adjacent_numbers:
                     adjacent_number_green_fields = self.fields_nearby(adjacent_number.board_coordinate, fields.GreenField)
                     adjacent_number_mines = self.fields_nearby(adjacent_number.board_coordinate, fields.Mine)
-                    common_greenfields = adjacent_number_green_fields.intersection(numbers_green_fields)
+                    common_greenfields = adjacent_number_green_fields.intersection(number_green_fields)
                     if common_greenfields:
                         if adjacent_number.number - len(adjacent_number_mines) == 1:
                             if number.number - 1 - len(numbers_mines) == 1:
-                                if len(numbers_green_fields) - len(common_greenfields) == 1:
-                                    to_mark = numbers_green_fields.difference(adjacent_number_green_fields)
-                                    to_click = adjacent_number_green_fields.difference(numbers_green_fields)
-                                    if to_click or to_mark:
-                                        if to_click:
-                                            print(f"more advanced clicking {to_click}")
-                                            for green_field in to_click:
-                                                self.click(green_field.board_coordinate)
-                                        if to_mark:
-                                            print(f"more advanced marking {to_mark}")
-                                            for mine in to_mark:
-                                                self.mark_as_mine(mine.board_coordinate)
-                                        return True
+                                if len(number_green_fields) - len(common_greenfields) == 1:
+                                    to_mark = number_green_fields.difference(adjacent_number_green_fields)
+                                    to_click = adjacent_number_green_fields.difference(number_green_fields)
+                                    if to_click:
+                                        fields_to_click.update(to_click)
+                                    if to_mark:
+                                        fields_to_mark.update(to_mark)
+                    if common_greenfields == number_green_fields:
+                        action_fields = adjacent_number_green_fields.difference(number_green_fields)
+                        if action_fields:
+                            if adjacent_number.number - len(adjacent_number_mines) == 1:
+                                fields_to_click.update(action_fields)
+                            elif len(action_fields) == 1:
+                                fields_to_mark.update(action_fields)
+        for field_to_click in fields_to_click:
+            self.click(field_to_click.board_coordinate)
+        for field_to_mark in fields_to_mark:
+            self.mark_as_mine(field_to_mark.board_coordinate)
+        if fields_to_click or fields_to_mark:
+            return True
         return False
 
     def solve(self: "AI"
@@ -277,9 +247,8 @@ class AI:
             # if no mines were found nor there were anywhere to click there wont be any change in next
             # iteration and might as well exit as the algorithm will not find anything more
             if not mines and not fields_to_click:
-                if not self.more_advanced_algorithm():
-                    if not self.advanced_algorithm():
-                        break
+                if not self.advanced_algorithm():
+                    break
 
 
 if __name__ == '__main__':

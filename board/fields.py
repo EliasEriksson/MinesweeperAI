@@ -40,9 +40,7 @@ class Field:
     def __repr__(self: "Field"
                  ) -> str:
 
-        return (f"{self.__class__.__name__}("
-                f"board_coordinate={self.board_coordinate}), "
-                f"image_coordinate={self.image_coordinate}")
+        return f"{self.__class__.__name__}(board_coordinate={self.board_coordinate})"
 
 
 class GreenField(Field):
