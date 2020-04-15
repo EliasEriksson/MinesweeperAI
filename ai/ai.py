@@ -21,14 +21,13 @@ class AI:
     def __init__(self: "AI"
                  ) -> None:
         """
-
-        :var self.start: the pixel position where the game board starts on screen.
-        :var self.end: the pixel position where the game board ends on screen.
-        :var self.click_delay: a safety delay to make sure the click occurs on the cursors position.
-        :var self.animation_delay: the animation of a clicked block being destroyed in to small particles.
-        :var self.board: instance of Board.
-        :var self.cursor_resting_point: a place for the cursor to be when a new screenshot is taken.
-        :var self.mouse: mouse controls.
+        :attr start: the pixel position where the game board starts on screen.
+        :attr end: the pixel position where the game board ends on screen.
+        :attr click_delay: a safety delay to make sure the click occurs on the cursors position.
+        :attr animation_delay: the animation of a clicked block being destroyed in to small particles.
+        :attr board: instance of Board.
+        :attr cursor_resting_point: a place for the cursor to be when a new screenshot is taken.
+        :attr mouse: mouse controls.
         """
         screen = screenshot()
         start, end, difficulty = board.find(screen)
@@ -155,7 +154,7 @@ class AI:
     def advanced_algorithm(self):
         fields_to_click = set()
         fields_to_mark = set()
-        for number in self.board.numbers:
+        for number in self.board.numbers.copy():
             number = self.board[number]
             number_green_fields = self.fields_nearby(number.board_coordinate, fields.GreenField)
             if number_green_fields:
@@ -182,6 +181,10 @@ class AI:
                                 fields_to_click.update(action_fields)
                             elif len(action_fields) == 1:
                                 fields_to_mark.update(action_fields)
+            else:
+                self.board.done_numbers.add(number.board_coordinate)
+                self.board.numbers.remove(number.board_coordinate)
+
         for field_to_click in fields_to_click:
             self.click(field_to_click.board_coordinate)
         for field_to_mark in fields_to_mark:
@@ -216,36 +219,39 @@ class AI:
             self.update()
             # loops over all the numbers on the board
             # marks green fields as mines if its found to be a mine described in function doc string
-            mines = {
-                green_field.board_coordinate
-                for number in self.board.numbers
-                if (nearby_green_fields := self.fields_nearby(number, fields.GreenField))
-                if len(nearby_green_fields) == self.board[number].number - len(self.fields_nearby(number, fields.Mine))
-                for green_field in nearby_green_fields
-            }
+            mines = set()
+            for number in self.board.numbers.copy():
+                adjacent_greenfields = self.fields_nearby(number, fields.GreenField)
+                if adjacent_greenfields:
+                    if len(adjacent_greenfields) == self.board[number].number - len(self.fields_nearby(number, fields.Mine)):
+                        mines.update(adjacent_greenfields)
+                else:
+                    self.board.done_numbers.add(number)
+                    self.board.numbers.remove(number)
 
             # mark the mines visually with a flag (can be removed sadly)
             for mine in mines:
-                self.mark_as_mine(mine)
+                self.mark_as_mine(mine.board_coordinate)
 
             # loops over all of the marked mines on the board and find all nearby numbers
             # loops over all the found nearby numbers and checks how many mines are nearby
             # if there are as many nearby mines as the value of the number all
-            fields_to_click = {
-                green_field.board_coordinate
-                for mine in self.board.mines
-                if (numbers := self.fields_nearby(mine, fields.Number))
-                for number in numbers
-                if number.number == len(self.fields_nearby(number.board_coordinate, fields.Mine))
-                for green_field in self.fields_nearby(number.board_coordinate, fields.GreenField)
-            }
+
+            fields_to_click = set()
+            for mine in self.board.mines:
+                numbers = self.fields_nearby(mine, fields.Number)
+                for number in numbers:
+                    number_mines = self.fields_nearby(number.board_coordinate, fields.Mine)
+                    if number.number == len(number_mines):
+                        fields_to_click.update(self.fields_nearby(number.board_coordinate, fields.GreenField))
 
             # nearby green fields are located and are clicked
             for field in fields_to_click:
-                self.click(field)
+                self.click(field.board_coordinate)
 
             # if no mines were found nor there were anywhere to click there wont be any change in next
             # iteration and might as well exit as the algorithm will not find anything more
+            print(len(self.board.numbers))
             if not mines and not fields_to_click:
                 if not self.advanced_algorithm():
                     break

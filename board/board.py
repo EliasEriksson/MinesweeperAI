@@ -29,8 +29,9 @@ class Board:
             (x, y): fields.GreenField((x, y), self.square_size)
             for y in range(0, int(self.board_height / self.square_size))
             for x in range(0, int(self.board_width / self.square_size))}  # will be redefined after every update
-        self.green_field: Set[Tuple[int, int]] = set(self.board.keys())  # will get keys subtracted durring runtime
+        self.green_field: Set[Tuple[int, int]] = set(self.board.keys())  # will get keys subtracted during runtime
         self.numbers: Set[Tuple[int, int]] = set()
+        self.done_numbers: Set[Tuple[int, int]] = set()
         self.beige_fields: Set[Tuple[int, int]] = set()
         self.mines: Set[Tuple[int, int]] = set()
         self.size = max(self.board.keys())
