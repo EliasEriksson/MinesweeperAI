@@ -6,6 +6,8 @@ from PIL import ImageGrab
 from PIL import Image
 from time import sleep
 
+# TODO make sure docstrings are up to date
+
 
 def screenshot(start: Optional[Tuple[int, int]] = None,
                end: Optional[Tuple[int, int]] = None
@@ -80,8 +82,6 @@ class AI:
                      ) -> None:
         """marks a field on given coordinate to be a mine (flag it)
 
-        this is only for visuals, all calls to this methods can be removed
-
         adds the starting point of the board and height/width of the board to determine where
         to place the mouse and then click
 
@@ -95,62 +95,8 @@ class AI:
             sleep(self.click_delay)
             self.board.mark_as_mine(field)
 
-    def fields_nearby(self: "AI",
-                      field: Field,
-                      field_type: Type[Field]
-                      ) -> Set[TypeVar("Field", bound=Field)]:
-        """looks around given coordinate for fields matching `field`'s type
-
-        length of returned list is in range 0-8 inclusive
-
-        looks thru the internal board for types around the given coordinate in all "45 degree angles"
-        for a field of the same type as the given field parameter
-
-        :param field:
-        :param field_type: type of field to compare
-        :return: list of fields of same type as given field parameter
-        """
-        # TODO move this method to the Field class instead. board coordinate should nto be used outside of the class
-        fields_ = set()
-        x, y = field.board_coordinate
-        if 0 < x:
-            if 0 < y:
-                field_ = self.board[(x - 1, y - 1)]
-                if field_.same_name(field_type):
-                    fields_.add(field_)
-            field_ = self.board[(x - 1, y)]
-            if field_.same_name(field_type):
-                fields_.add(field_)
-
-        if y < self.board.size[1]:
-            if 0 < x:
-                field_ = self.board[(x - 1, y + 1)]
-                if field_.same_name(field_type):
-                    fields_.add(field_)
-            field_ = self.board[(x, y + 1)]
-            if field_.same_name(field_type):
-                fields_.add(field_)
-
-        if x < self.board.size[0]:
-            if y < self.board.size[1]:
-                field_ = self.board[(x + 1, y + 1)]
-                if field_.same_name(field_type):
-                    fields_.add(field_)
-            field_ = self.board[(x + 1, y)]
-            if field_.same_name(field_type):
-                fields_.add(field_)
-
-        if 0 < y:
-            if x < self.board.size[0]:
-                field_ = self.board[(x + 1, y - 1)]
-                if field_.same_name(field_type):
-                    fields_.add(field_)
-            field_ = self.board[(x, y - 1)]
-            if field_.same_name(field_type):
-                fields_.add(field_)
-        return fields_
-
-    def advanced_algorithm(self):
+    def advanced_algorithm(self: "AI"
+                           ) -> bool:
         """a more advanced algorithm that utilises 2 numbers with common green fields
 
         :return: None
@@ -158,13 +104,13 @@ class AI:
         fields_to_click = set()
         fields_to_mark = set()
         for number in self.board.numbers.copy():
-            number_green_fields = self.fields_nearby(number, GreenField)
+            number_green_fields = number.adjacent_fields(self.board, GreenField)
             if number_green_fields:
-                numbers_mines = self.fields_nearby(number, Mine)
-                adjacent_numbers = self.fields_nearby(number, Number)
+                numbers_mines = number.adjacent_fields(self.board, Mine)
+                adjacent_numbers: Set[Number] = number.adjacent_fields(self.board, Number)
                 for adjacent_number in adjacent_numbers:
-                    adjacent_number_green_fields = self.fields_nearby(adjacent_number, GreenField)
-                    adjacent_number_mines = self.fields_nearby(adjacent_number, Mine)
+                    adjacent_number_green_fields = adjacent_number.adjacent_fields(self.board, GreenField)
+                    adjacent_number_mines = adjacent_number.adjacent_fields(self.board, Mine)
                     common_green_fields = adjacent_number_green_fields.intersection(number_green_fields)
                     if common_green_fields:
                         if adjacent_number.value - len(adjacent_number_mines) == 1:
@@ -220,9 +166,9 @@ class AI:
             self.update()
             mines: Set[GreenField] = set()
             for number in self.board.numbers.copy():
-                adjacent_green_fields = self.fields_nearby(number, GreenField)
+                adjacent_green_fields = number.adjacent_fields(self.board, GreenField)
                 if adjacent_green_fields:
-                    if len(adjacent_green_fields) == number.value - len(self.fields_nearby(number, Mine)):
+                    if len(adjacent_green_fields) == number.value - len(number.adjacent_fields(self.board, Mine)):
                         mines.update(adjacent_green_fields)
                 else:
                     self.board.done_numbers.add(number)
@@ -233,10 +179,10 @@ class AI:
 
             fields_to_click: Set[GreenField] = set()
             for mine in self.board.mines:
-                numbers = self.fields_nearby(mine, Number)
+                numbers = mine.adjacent_fields(self.board, Number)
                 for number in numbers:
-                    if number.value == len(self.fields_nearby(number, Mine)):
-                        fields_to_click.update(self.fields_nearby(number, GreenField))
+                    if number.value == len(number.adjacent_fields(self.board, Mine)):
+                        fields_to_click.update(number.adjacent_fields(self.board, GreenField))
 
             for field in fields_to_click:
                 self.click(field)
@@ -247,4 +193,4 @@ class AI:
 
 
 if __name__ == '__main__':
-    print(AI.__init__.__doc__)
+    help(AI)

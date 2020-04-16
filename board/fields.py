@@ -1,4 +1,8 @@
 from typing import *
+if TYPE_CHECKING:
+    from board import Board
+
+# TODO make sure docstrings are up to date
 
 
 class Field:
@@ -26,6 +30,60 @@ class Field:
         self.lookup_point = (x * size + fix, y * size + fix)
         self.lookup_area = (*self.lookup_point, x * size + size - fix, y * size + size - fix)
         self.middle = (x * size + (length := round(size / 2)), y * size + length)
+
+    def adjacent_fields(self: "Field",
+                        board: "Board",
+                        field_type: Type["Field"]
+                        ) -> Set[TypeVar("Field", bound="Field")]:
+        """looks around given coordinate for fields matching `field`'s type
+
+        length of returned list is in range 0-8 inclusive
+
+        looks thru the internal board for types around the given coordinate in all "45 degree angles"
+        for a field of the same type as the given field parameter
+
+        :param board:
+        :param field_type: type of field to compare
+        :return: list of fields of same type as given field parameter
+        """
+        fields: Set[Field] = set()
+        x, y = self.board_coordinate
+        if 0 < x:
+            if 0 < y:
+                field = board[(x - 1, y - 1)]
+                if field.same_name(field_type):
+                    fields.add(field)
+            field = board[(x - 1, y)]
+            if field.same_name(field_type):
+                fields.add(field)
+
+        if y < board.size[1]:
+            if 0 < x:
+                field = board[(x - 1, y + 1)]
+                if field.same_name(field_type):
+                    fields.add(field)
+            field = board[(x, y + 1)]
+            if field.same_name(field_type):
+                fields.add(field)
+
+        if x < board.size[0]:
+            if y < board.size[1]:
+                field = board[(x + 1, y + 1)]
+                if field.same_name(field_type):
+                    fields.add(field)
+            field = board[(x + 1, y)]
+            if field.same_name(field_type):
+                fields.add(field)
+
+        if 0 < y:
+            if x < board.size[0]:
+                field = board[(x + 1, y - 1)]
+                if field.same_name(field_type):
+                    fields.add(field)
+            field = board[(x, y - 1)]
+            if field.same_name(field_type):
+                fields.add(field)
+        return fields
 
     @classmethod
     def from_field(cls: Type["Field"],
