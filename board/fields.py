@@ -3,14 +3,25 @@ from typing import *
 
 class Field:
     def __init__(self: "Field",
-                 coordnate: Tuple[int, int],
+                 coordinate: Tuple[int, int],
                  size: int,
-                 *args) -> None:
-
-        x, y = coordnate
+                 *args: Any
+                 ) -> None:
+        """
+        :attr image_coordinate: the top left coordinate of the field on the screenshot
+        :attr board_coordinate: the coordinate on the internal board
+        :attr size: the with/height of the square in pixels
+        :attr lookup_point: the image coordinate where the
+        :attr lookup_area: the pixel on the screenshot that is  checked when the field is updated (after being clicked)
+        :attr middle: the pixel to click to click the field
+        :param coordinate: the coordinate on the board
+        :param size: the with/height of the square in pixels
+        :param args: additional arguments to support children
+        """
+        x, y = coordinate
         fix = 4 if size > 40 else 3
         self.image_coordinate = (x * size, y * size)
-        self.board_coordinate = coordnate
+        self.board_coordinate = coordinate
         self.size = size
         self.lookup_point = (x * size + fix, y * size + fix)
         self.lookup_area = (*self.lookup_point, x * size + size - fix, y * size + size - fix)
@@ -21,10 +32,22 @@ class Field:
                    field: "Field",
                    *args: Any
                    ) -> "Field":
+        """constructs a new Field type from an already existing field
 
+        :param field: the field to construct from
+        :param args: additional arguments to support some children
+        :return: Field
+        """
         return cls(field.board_coordinate, field.size, *args)
 
-    def same_name(self, other: Type["Field"]) -> bool:
+    def same_name(self: "Field",
+                  other: Type["Field"]
+                  ) -> bool:
+        """compares the instance class name with a class's class name
+
+        :param other: some uninitiated class
+        :return: bool
+        """
         return self.__class__.__name__ == other.__name__
 
     def __eq__(self: "Field",
@@ -34,12 +57,15 @@ class Field:
 
     def __hash__(self: "Field"
                  ) -> int:
+        """allows the object to be hashable
 
+        mainly implemented to be used in sets
+        :return: int
+        """
         return hash(self.board_coordinate)
 
     def __repr__(self: "Field"
                  ) -> str:
-
         return f"{self.__class__.__name__}(board_coordinate={self.board_coordinate})"
 
 
@@ -55,11 +81,10 @@ class Number(Field):
     def __init__(self: "Number",
                  coordinate: Tuple[int, int],
                  size: int,
-                 number: Tuple[int, ...]
+                 number: int
                  ) -> None:
-
         super(Number, self).__init__(coordinate, size)
-        self.number = number
+        self.value = number
 
 
 class Mine(Field):
