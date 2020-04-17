@@ -5,8 +5,6 @@ import board.fields as fields
 from PIL import Image
 import pytesseract
 
-# TODO make sure doc strings are up to date
-
 
 class Board:
     def __init__(self: "Board",

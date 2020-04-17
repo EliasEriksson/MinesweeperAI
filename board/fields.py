@@ -2,8 +2,6 @@ from typing import *
 if TYPE_CHECKING:
     from board import Board
 
-# TODO make sure docstrings are up to date
-
 
 class Field:
     def __init__(self: "Field",

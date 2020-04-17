@@ -6,16 +6,14 @@ from PIL import ImageGrab
 from PIL import Image
 from time import sleep
 
-# TODO make sure docstrings are up to date
-
 
 def screenshot(start: Optional[Tuple[int, int]] = None,
                end: Optional[Tuple[int, int]] = None
                ) -> Image.Image:
-    """takes a screenshot and crops it to start and end
+    """takes a screenshot and crops it to start and end.
 
-    :param start: top left of the crop
-    :param end: bottom right of the crop
+    :param start: top left of the crop.
+    :param end: bottom right of the crop.
     :return: Image.Image
     """
     if start and end:
@@ -49,10 +47,10 @@ class AI:
 
     def update(self: "AI"
                ) -> None:
-        """takes a new screenshot and updates the board
+        """takes a new screenshot and updates the board.
 
         with the given screenshot the board will get updated where the algorithm have not yet determined
-        mine, beige field or a number
+        mine, beige field or a number.
         :return: None
         """
         self.mouse.position = self.cursor_resting_point
