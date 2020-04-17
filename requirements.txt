@@ -1,4 +1,4 @@
-pillow --global-option="build_ext" --global-option="--enable-xcb"
+pillow >= 7.1 --global-option="build_ext" --global-option="--enable-xcb"
 numpy
 pynput
 pytesseract
