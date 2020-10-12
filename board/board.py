@@ -56,11 +56,12 @@ class Board:
         else:
             square = image.crop(field.lookup_area)
             number = pytesseract.image_to_string(square, config='--psm 10, -c tessedit_char_whitelist=12345678')
-            if number:
+            try:
+                num = int(number)
                 self.green_fields.remove(field)
-                field = fields.Number.from_field(field, int(number))
+                field = fields.Number.from_field(field, num)
                 self.numbers.add(field)
-            else:
+            except ValueError:
                 self.green_fields.remove(field)
                 field = fields.BeigeField.from_field(field)
         self.board[field.board_coordinate] = field
